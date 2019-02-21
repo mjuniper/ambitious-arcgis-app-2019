@@ -1,5 +1,18 @@
-{{!-- The following component displays Ember's default welcome message. --}}
-{{welcome-page}}
-{{!-- Feel free to remove this! --}}
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand" href="#">Ambitious ArcGIS App</a>
 
-{{outlet}}
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        {{#link-to "index" class="nav-link"}}Home{{/link-to}}
+      </li>
+      <li class="nav-item">
+        {{#link-to "items" class="nav-link"}}Items{{/link-to}}
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  {{outlet}}
+</div>

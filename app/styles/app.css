@@ -1,0 +1,11 @@
+/* bootstrap styles */
+@import "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css";
+
+body {
+  padding-top: 3.5rem;
+}
+
+/* index */
+.jumbotron {
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(./images/Banner9.jpg) center top/cover no-repeat;
+}
