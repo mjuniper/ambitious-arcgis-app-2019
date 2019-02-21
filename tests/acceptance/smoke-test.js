@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import { click, fillIn, visit, currentURL } from '@ember/test-helpers';
+import { click, fillIn, findAll, visit, currentURL } from '@ember/test-helpers';
 import { setupApplicationTest } from 'ember-qunit';
 
 module('Acceptance | smoke', function(hooks) {
@@ -14,5 +14,7 @@ module('Acceptance | smoke', function(hooks) {
     await click('form .input-group button');
 
     assert.equal(currentURL(), '/items?q=water');
+
+    assert.equal(findAll('table tbody tr').length, 10);
   });
 });

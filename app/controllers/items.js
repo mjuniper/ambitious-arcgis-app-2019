@@ -4,7 +4,8 @@ export default Controller.extend({
 
   actions: {
     doSearch (q) {
-      this.transitionToRoute('items', {
+      // NOTE: don't need to pass route name b/c same route
+      this.transitionToRoute({
         queryParams: { q }
       });
     }
