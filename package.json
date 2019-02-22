@@ -23,6 +23,7 @@
     "bootstrap": "^4.3.1",
     "broccoli-asset-rev": "^2.7.0",
     "ember-ajax": "^3.1.0",
+    "ember-arcgis-portal-services": "^1.14.0",
     "ember-bootstrap": "^2.5.0",
     "ember-cli": "~3.7.1",
     "ember-cli-app-version": "^3.2.0",
@@ -44,7 +45,9 @@
     "ember-welcome-page": "^3.2.0",
     "eslint-plugin-ember": "^5.2.0",
     "loader.js": "^4.7.0",
-    "qunit-dom": "^0.8.0"
+    "qunit-dom": "^0.8.0",
+    "torii": "^0.10.1",
+    "torii-provider-arcgis": "^2.2.1"
   },
   "engines": {
     "node": "6.* || 8.* || >= 10.*"

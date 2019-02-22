@@ -50,3 +50,89 @@ Notice that:
 
 Notice that:
 - you can now use the navbar toggle on mobile
+
+## Add ember-arcgis-portal-services
+- stop app (`ctrl+C`)
+- first [install and configure torii-provider-arcgis](https://github.com/dbouwman/torii-provider-arcgis#usage):
+ - `ember install torii`
+ - `ember install torii-provider-arcgis`
+ - in config/environment.js add the following above `APP`:
+
+```js
+torii: {
+  sessionServiceName: 'session',
+  providers: {
+   'arcgis-oauth-bearer': {
+      portalUrl: 'https://www.arcgis.com'
+    }
+  }
+},
+```
+- remove fake implementation of itemsService:
+`ember destroy service items-service`
+- `ember install ember-arcgis-portal-services`
+- `ember serve` and visit `localhost:4200`
+
+Notice that:
+- entering search terms returns real results!
+- Only getting 10 though, so let's add paging
+
+NOTE: you will also see deprecation warnings in the console. This is OK, and [is coming from an upstream dependency](https://github.com/Vestorly/torii/issues/424).
+
+## Add paging parameters to routes and controllers
+in app/routes/items.js:
+- add these query paramters above the `q` param:
+
+```js
+// paging query params
+start: { refreshModel: true },
+num: { refreshModel: true },
+```
+
+- then update the `model()` hook as follows:
+
+```js
+return itemsService.search({ q, num: params.num, start: params.start });
+```
+
+in app/controllers/items.js:
+- add this to the controller above the `actions`:
+
+```js
+// query parameters used by components
+queryParams: ['start', 'num'],
+start: 1,
+num: 10,
+```
+
+- in `transitionToRoute()` update the `queryParams` as follows:
+
+```js
+// for a new query string, sart on first page
+queryParams: { q , start: 1 }
+```
+
+in app/controllers/index.js:
+- in `transitionToRoute()` update the `queryParams` as follows:
+
+```js
+// for a new query string, sart on first page
+queryParams: { q , start: 1 }
+```
+
+- run `ember serve`
+- search for `water`
+- append the following to query string: `&start=11&num=5` and hit enter
+- play around w/ those parameters and see what happens
+
+Notice that:
+- you can control the number and starting point for results via query string params
+- searching from a different term (either from home or items route) will reset the starting point, but not the number of records shown
+
+## Make sure tests still pass
+
+Let's run the tests to make sure nothing has broken
+- stop app (`ctrl+C`)
+- run the tests w/ `ember t`
+
+The tests should pass, but some of you may notice that the acceptance test failed. This is a [known issue](https://github.com/Esri/ember-arcgis-portal-services/issues/148).

@@ -8,6 +8,9 @@ export default Route.extend({
   // changes to these query parameter will cause this route to
   // update the model by calling the "model()" hook again
   queryParams: {
+    // paging query params
+    start: { refreshModel: true },
+    num: { refreshModel: true },
     q: { refreshModel: true }
   },
 
@@ -15,6 +18,6 @@ export default Route.extend({
   model (params) {
     const itemsService = this.get('itemsService');
     const q = params.q || '*';
-    return itemsService.search({ q });
+    return itemsService.search({ q, num: params.num, start: params.start });
   }
 });
