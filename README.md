@@ -21,7 +21,7 @@ This repository contains the source code and resources from the DevSummit 2017 B
   - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2019/blob/master/workshop/2-architecture.md)
 - Addons
   - [slides](https://tomwayson.github.io/devsummit-2018/ambitious-arcgis-apps-3-addons.html)
-  - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2018/blob/master/workshop/3-addons.md)
+  - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2019/blob/master/workshop/3-addons.md)
 - Auth
   - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2018/blob/master/workshop/4-auth-me-baby.md)
 - Maps
