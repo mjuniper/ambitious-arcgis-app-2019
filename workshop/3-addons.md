@@ -136,3 +136,70 @@ Let's run the tests to make sure nothing has broken
 - run the tests w/ `ember t`
 
 The tests should pass, but some of you may notice that the acceptance test failed. This is a [known issue](https://github.com/Esri/ember-arcgis-portal-services/issues/148).
+
+## Bonus: add paging component
+[ember-arcgis-portal-components](https://github.com/Esri/ember-arcgis-portal-components) has [a paging component you can use](https://esri.github.io/ember-arcgis-portal-components/#/itempicker/defaultcatalog). Those components are internationalized so first we install and configure [ember-intl](https://github.com/ember-intl/ember-intl):
+- stop app (`ctrl+C`)
+- `ember install ember-intl`
+- we need to set the default locale before the app loads, best place is an application route:
+`ember generate route application`
+- **IMPORTANT: do NOT overwrite the existing app/templates/application.hbs file!**
+- replace the content of app/routes/application.js with:
+
+```js
+import { inject as service } from '@ember/service';
+import Route from '@ember/routing/route';
+
+export default Route.extend({
+  intl: service(),
+  beforeModel() {
+    return this.get('intl').setLocale('en-us');
+  }
+});
+```
+- now we can install portal components addon: `ember install ember-arcgis-portal-components`
+
+Let's add the `{{item-pager}}` in app/templates/items.hbs:
+- add this below the `<table>`:
+
+```hbs
+{{item-pager
+  pageSize=num
+  totalCount=model.total
+  pageNumber=pageNumber
+  changePage=(action "changePage")
+}}
+```
+
+in app/controllers/items.js:
+- add this to the top of the file:
+`import { computed } from '@ember/object';`
+
+- add this below the `num: 10,` query parameter:
+
+```js
+// compute current page number based on start record
+// and the number of records per page
+pageNumber: computed('num', 'model.start', function () {
+  const pageSize = this.get('num');
+  const start = this.get('model.start');
+  return ((start - 1) / pageSize) + 1;
+}),
+```
+
+- add this to the actions above `doSearch`:
+
+```js
+changePage (page) {
+  // calculate next start record based on
+  // the number of records per page
+  const pageSize = this.get('num');
+  const nextStart = ((page - 1) * pageSize) + 1;
+  this.set('start', nextStart);
+},
+```
+
+- run `ember serve`
+
+Notice that:
+- there is a paging controller below the table that allows you to page through records
