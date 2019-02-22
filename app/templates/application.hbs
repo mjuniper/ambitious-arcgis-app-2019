@@ -1,17 +1,19 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-  <a class="navbar-brand" href="#">Ambitious ArcGIS App</a>
-
-  <div class="collapse navbar-collapse">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        {{#link-to "index" class="nav-link"}}Home{{/link-to}}
-      </li>
-      <li class="nav-item">
-        {{#link-to "items" class="nav-link"}}Items{{/link-to}}
-      </li>
-    </ul>
+{{#bs-navbar class="navbar-expand-md navbar-dark fixed-top bg-dark" as |navbar|}}
+  <div class="navbar-header">
+    {{navbar.toggle}}
+    <a class="navbar-brand" href="#">Ambitious ArcGIS App</a>
   </div>
-</nav>
+  {{#navbar.content}}
+    {{#navbar.nav as |nav|}}
+      {{#nav.item}}
+        {{#nav.link-to "index"}}Home{{/nav.link-to}}
+      {{/nav.item}}
+      {{#nav.item}}
+        {{#nav.link-to "items"}}Items{{/nav.link-to}}
+      {{/nav.item}}
+    {{/navbar.nav}}
+  {{/navbar.content}}
+{{/bs-navbar}}
 
 <div class="container mt-5">
   {{outlet}}
