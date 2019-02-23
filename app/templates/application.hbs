@@ -15,12 +15,12 @@
   {{/navbar.content}}
   {{#navbar.nav class="ml-auto" as |nav|}}
     {{#if session.isAuthenticated}}
-    {{#nav.dropdown as |dd|}}
-      {{#dd.toggle class="ml-auto"}}{{session.currentUser.fullName}}  <span class="caret"></span>{{/dd.toggle}}
-      {{#dd.menu as |ddm|}}
-        {{#ddm.item}}<a class="dropdown-item" href="#" {{action "signout"}}>Sign Out</a>{{/ddm.item}}
-      {{/dd.menu}}
-    {{/nav.dropdown}}
+      {{#nav.dropdown as |dd|}}
+        {{#dd.toggle class="ml-auto"}}{{session.currentUser.fullName}}  <span class="caret"></span>{{/dd.toggle}}
+        {{#dd.menu as |ddm|}}
+          {{#ddm.item}}<a class="dropdown-item" href="#" {{action "signout"}}>Sign Out</a>{{/ddm.item}}
+        {{/dd.menu}}
+      {{/nav.dropdown}}
     {{else}}
       {{#nav.item}}<a class="nav-link active" href="#" {{action "signin"}}>Sign In</a>{{/nav.item}}
     {{/if}}
