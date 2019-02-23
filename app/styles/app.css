@@ -11,3 +11,11 @@ body {
 .search-form-inline {
   margin-top: 5px;
 }
+
+/* map */
+.extents-map {
+  height: 300px;
+}
+.extents-map.esri-view {
+  margin-bottom: 20px;
+}
