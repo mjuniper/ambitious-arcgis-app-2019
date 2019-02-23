@@ -122,3 +122,120 @@ export default Component.extend({
 
 Notice that:
 - you should see a map
+
+## Showing item extents on the map
+
+### Logic
+Once the map has loaded, and whenever map component's items are updated:
+- clear map graphics
+- loop through items, and for each
+ - create a `new Graphic()` from the item
+ - add the graphic to the map
+
+2 sets of async state: Application (Ember) and map:
+- each has own lifecyle (event)
+- up to developer to keep 2 sets of state in sync.
+
+Converting item to a [Graphic](https://developers.arcgis.com/javascript/latest/sample-code/intro-graphics/index.html):
+- get `geometry` by converting item `extent` from coordinate array to extent JSON
+- get `attributes` from item `title` and `snippet`
+- get `infoTemplate` and `symbol` from config
+
+### Add configuration parameters
+Before we add the code to show graphics, let's put default parameters into the application config.
+- stop app if running (`ctrl+C`)
+- in config/environment.js add this to `APP`:
+
+```js
+map: {
+  options: {
+    basemap: 'gray'
+  },
+  itemExtents: {
+    symbol: {
+      color: [51, 122, 183, 0.125],
+      outline: {
+        color: [51, 122, 183, 1],
+        width: 1,
+        type: 'simple-line',
+        style: 'solid'
+      },
+      type: 'simple-fill',
+      style: 'solid'
+    },
+    popupTemplate: {
+      title: '{title}',
+      content: '{snippet}'
+    }
+  }
+}
+```
+
+### Add a utility function to convert an item to graphic JSON
+
+- run tests w/ `ember test -s`
+- type 'unit' into the `Filter` textbox and click `Go`
+- in tests/unit/utils/map.js:
+ - add `, itemToGraphicJson` to the map util `import` statement
+ - add the following tests:
+
+```js
+test('itemToGraphicJson', function(assert) {
+  const item = {
+    extent: [[-53.2316, -79.8433], [180, 79.8433]],
+    title: 'Test Item',
+    snippet: 'this is a test item'
+  };
+  let result = itemToGraphicJson(item);
+  assert.deepEqual(result.geometry, {
+    type: 'extent',
+    xmin: -53.2316,
+    ymin: -79.8433,
+    xmax: 180,
+    ymax: 79.8433,
+    spatialReference:{
+      wkid:4326
+    }
+  });
+  assert.deepEqual(result.attributes, item);
+});
+
+test('itemToGraphicJson with no extent', function(assert) {
+  const item = {
+    title: 'Item with no extent',
+    snippet: 'sometimes items do not have extents'
+  };
+  let result = itemToGraphicJson(item);
+  assert.equal(result.geometry, null);
+  assert.deepEqual(result.attributes, item);
+});
+```
+
+- you should see failing tests
+- add the following to the bottom of app/utils/map.js:
+
+```js
+export function itemToGraphicJson (item, symbol, popupTemplate) {
+  const geometry = coordsToExtent(item.extent);
+  return { geometry, symbol, attributes: item, popupTemplate };
+}
+
+// expect [[-53.2316, -79.8433], [180, 79.8433]] or []
+function coordsToExtent (coords) {
+  if (coords && coords.length === 2) {
+    return {
+      type: 'extent',
+      xmin: coords[0][0],
+      ymin: coords[0][1],
+      xmax: coords[1][0],
+      ymax: coords[1][1],
+      spatialReference:{
+        wkid:4326
+      }
+    };
+  }
+}
+```
+
+- all tests should pass now
+- stop tests by typing `q`

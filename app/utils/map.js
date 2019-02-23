@@ -38,3 +38,24 @@ export function newMap(element, mapOptions) {
     };
   });
 }
+
+export function itemToGraphicJson (item, symbol, popupTemplate) {
+  const geometry = coordsToExtent(item.extent);
+  return { geometry, symbol, attributes: item, popupTemplate };
+}
+
+// expect [[-53.2316, -79.8433], [180, 79.8433]] or []
+function coordsToExtent (coords) {
+  if (coords && coords.length === 2) {
+    return {
+      type: 'extent',
+      xmin: coords[0][0],
+      ymin: coords[0][1],
+      xmax: coords[1][0],
+      ymax: coords[1][1],
+      spatialReference:{
+        wkid:4326
+      }
+    };
+  }
+}
