@@ -4,11 +4,11 @@ import esriLoader from 'esri-loader';
 export function newMap(element, mapOptions) {
   // lazy load the map modules and CSS
   return esriLoader.loadModules(
-    ['esri/Map', 'esri/views/MapView'],
+    ['esri/Map', 'esri/views/MapView', 'esri/Graphic'],
     // NOTE: keep this current w/ the latest version of the JSAPI
     { css: 'https://js.arcgis.com/4.10/esri/css/main.css' }
   )
-  .then(([Map, MapView]) => {
+  .then(([Map, MapView, Graphic]) => {
     if (!element) {
       // component or app was likely destroyed
       return;
@@ -21,21 +21,34 @@ export function newMap(element, mapOptions) {
       container: element,
       zoom: 2
     });
-    // prevent zooming with the mouse-wheel
-    view.when(() => {
+    // wait for the view to load
+    return view.when(() => {
+      // prevent zooming with the mouse-wheel
       view.on("mouse-wheel", function(evt){
         evt.stopPropagation();
       });
-    });
-    // return closure scoped functions for working with the map
-    return {
-      destroy: function () {
-        if (view) {
-          view.container = null;
-          view = null;
+      // return closure scoped functions for working with the map
+      return {
+        refreshGraphics: function (jsonGraphics) {
+          if (!view || !view.ready) {
+            return;
+          }
+          // convert JSON to graphics
+          const graphics = jsonGraphics.map(json => {
+            return new Graphic(json);
+          });
+          // clear any existing graphics and add new ones (if any)
+          view.graphics.removeAll();
+          view.graphics.addMany(graphics);
+        },
+        destroy: function () {
+          if (view) {
+            view.container = null;
+            view = null;
+          }
         }
-      }
-    };
+      };
+    });
   });
 }
 
