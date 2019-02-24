@@ -136,7 +136,7 @@ Notice that:
 ## Showing item extents on the map
 
 ### Logic
-Once the map has loaded, and whenever map component's items are updated:
+Once the map has loaded, and whenever the search results are updated:
 - clear map graphics
 - loop through items, and for each
  - create a `new Graphic()` from the item
@@ -182,6 +182,7 @@ map: {
 ```
 
 ### Add a utility function to convert an item to graphic JSON
+We'll use test driven development for this function:
 
 - run tests w/ `ember test -s`
 - type 'unit' into the `Filter` textbox and click `Go`
@@ -249,3 +250,87 @@ function coordsToExtent (coords) {
 
 - all tests should pass now
 - stop tests by typing `q`
+
+### Return a function to refresh map graphics
+We'll need the `Graphic` class to add graphics to the map, so we load `esri/Graphic` in `newMap()` and return a function to refresh map graphics.
+
+- in app/utils/map.js:
+  - add `, 'esri/Graphic'` to the end of the array of module names passed to `loadModules()`
+  - add `, Graphic` to the end of the array of classes passed to the `.then()` callback
+  - add the following to the returned functions above `destroy()`:
+
+```js
+refreshGraphics: function (jsonGraphics) {
+  if (!view || !view.ready) {
+    return;
+  }
+  // convert JSON to graphics
+  const graphics = jsonGraphics.map(json => {
+    return new Graphic(json);
+  });
+  // clear any existing graphics and add new ones (if any)
+  view.graphics.removeAll();
+  view.graphics.addMany(graphics);
+},
+```
+
+- start the app (`ember serve`)
+
+Notice that:
+- the app still works (we didn't break anything)
+
+### Show graphics on the map
+Now we need to
+
+- in app/templates/items.hbs, pass search results to the map component:
+
+```hbs
+{{extents-map items=model.results}}
+```
+
+- in app/components/extents-map.js
+  - add `, itemToGraphicJson` to the map util `import` statement
+  - get defaults from config by adding this `import` statement:
+
+```js
+import config from '../config/environment';
+```
+
+  - add the following method above `didInsertElement()`:
+
+```js
+showItemsOnMap () {
+  if (!this._map) {
+    return;
+  }
+  const { symbol, popupTemplate } = config.APP.map.itemExtents;
+  const items = this.get('items');
+  const jsonGraphics = items && items.map(item => itemToGraphicJson(item, symbol, popupTemplate));
+  this._map.refreshGraphics(jsonGraphics);
+},
+```
+
+    - in `didInsertElement()`
+      - replace `{ basemap: 'gray' }` with `config.APP.map.options`
+      - add `this.showItemsOnMap();` right after `this._map = mapFunctions;`
+
+  - visit the items route
+
+Notice that:
+- the extents appear on the map
+- you can click on one and see the popup
+- but they don't update when you change the query, or page, so
+
+back in app/components/extents-map.js add this method after `didInsertElement()`:
+
+```js
+// whenever items change, update the map
+didUpdateAttrs () {
+  this.showItemsOnMap();
+},
+```
+
+- try searching, paging, navigating back to home and searching from there
+
+Notice that:
+- the extents on the map change when you change query/page
