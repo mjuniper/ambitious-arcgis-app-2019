@@ -123,6 +123,16 @@ export default Component.extend({
 Notice that:
 - you should see a map
 
+### Enable WebGL in tests
+
+If you run the tests from the command line `ember t` you will see an error with the message `WebGL is required but not supported.` This is because our smoke test actually renders a map now, and the JSAPI requires WebGL, and by default Ember disables WebGL when running tests.
+
+- in `testem.js` comment out this line: `'--disable-gpu',`
+- re-run `ember t`
+
+Notice that:
+- tests should pass
+
 ## Showing item extents on the map
 
 ### Logic
