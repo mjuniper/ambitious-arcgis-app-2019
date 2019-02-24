@@ -50,21 +50,22 @@ export function newMap(element, mapOptions) {
       container: element,
       zoom: 2
     });
-    // prevent zooming with the mouse-wheel
-    view.when(() => {
+    // wait for the view to load
+    return view.when(() => {
+      // prevent zooming with the mouse-wheel
       view.on("mouse-wheel", function(evt){
         evt.stopPropagation();
       });
-    });
-    // return closure scoped functions for working with the map
-    return {
-      destroy: function () {
-        if (view) {
-          view.container = null;
-          view = null;
+      // return closure scoped functions for working with the map
+      return {
+        destroy: function () {
+          if (view) {
+            view.container = null;
+            view = null;
+          }
         }
-      }
-    };
+      };
+    });
   });
 }
 ```
