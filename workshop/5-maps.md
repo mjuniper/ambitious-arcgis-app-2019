@@ -334,3 +334,103 @@ didUpdateAttrs () {
 
 Notice that:
 - the extents on the map change when you change query/page
+
+## Bonus - map component test
+
+### Stub the `newMap()` function
+
+We don't want to load the JSAPI or render a map when testing, so we'll use stubs and spies to test the map component.
+
+- stop app (`ctrl+C`)
+- `ember install ember-sinon-qunit`
+- `ember g component-test extents-map`
+- in tests/integration/components/extents-map-test.js:
+ - replace `import { module, test } from 'qunit';` with:
+
+```js
+import { module } from 'qunit';
+import test from 'ember-sinon-qunit/test-support/test';
+```
+
+- add the following `import` statements:
+
+```js
+import * as mapUtils from 'ambitious-arcgis-app-2019/utils/map';
+import config from 'ambitious-arcgis-app-2019/config/environment';
+```
+
+- replace the 'it renders' test with:
+
+```js
+test('it renders', async function(assert) {
+  // spy on the refreshGraphics() function returned by newMap()
+  const refreshGraphics = this.spy();
+  // stub the newMap() function so that a map is not constructed
+  const stub = this.stub(mapUtils, 'newMap').resolves({
+    refreshGraphics: refreshGraphics,
+    // NOTE: we don't spy on destroy() b/c it is called after the test completes
+    destroy: () => {},
+  });
+  // render the component with no items
+  this.set('items', undefined);
+  await render(hbs`{{extents-map items=items}}`);
+  // assertions
+  assert.ok(stub.calledOnce, 'newMap was called only once');
+  const args = stub.getCall(0).args;
+  const elementIdRegEx = /^ember(\d+)$/; // ex: ember123
+  assert.ok(elementIdRegEx.test(args[0]), 'element id was passed');
+  assert.equal(args[1], config.APP.map.options, 'config options were passed');
+  assert.ok(refreshGraphics.calledOnceWithExactly, 'refreshGraphics called once with no graphics');
+});
+```
+
+- run `ember t -s`
+- type 'extents-map' into the `Filter` textbox and click `Go`
+- open chrome devtools, inspect network requests
+
+Notice that:
+- all tests pass
+- no network requests are made for JSAPI
+
+### Test with items
+
+Back in in tests/integration/components/extents-map-test.js:
+- add the following below the `import` statements:
+
+```js
+// mock item search response
+function mockItems () {
+  return [
+    {
+      title: 'Item 1',
+      snippet: 'Item 1 snippet',
+      extent: [[-75.5596, 38.9285], [-73.9024, 41.3576]]
+    },
+    {
+      title: 'Item 2',
+      snippet: 'Item 2 snippet',
+      extent: [[-74, 39], [-73, 40]]
+    },
+    {
+      title: 'Item 3',
+      snippet: 'Item 3 snippet',
+      extent: [[-53.2316, -79.8433], [180, 79.8433]]
+    }
+  ];
+}
+```
+- add the following between `render()` and the assertions:
+
+```js
+// update the items
+this.set('items', mockItems());
+```
+
+- replace the last assertion with:
+
+```js
+assert.ok(refreshGraphics.calledTwice, 'refreshGraphics called twice');
+assert.deepEqual(refreshGraphics.firstCall.args, [undefined], 'refreshGraphics called with no graphics initially');
+const graphics = refreshGraphics.secondCall.args[0];
+assert.equal(graphics.length, this.get('items').length, 'same number of graphics as items');
+```
