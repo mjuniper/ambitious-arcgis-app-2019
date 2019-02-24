@@ -31,13 +31,13 @@ module('Integration | Component | extents-map', function(hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function(assert) {
-    // spy on the refreshGraphics() function returned by newMap()
-    const refreshGraphics = this.spy();
+    // spy on the refreshItems() function returned by newMap()
+    const refreshItems = this.spy();
     // stub the newMap() function so that a map is not constructed
     const stub = this.stub(mapUtils, 'newMap').resolves({
-      refreshGraphics: refreshGraphics,
+      refreshItems,
       // NOTE: we don't spy on destroy() b/c it is called after the test completes
-      destroy: () => {},
+      destroy: () => {}
     });
     // render the component with no items
     this.set('items', undefined);
@@ -50,9 +50,9 @@ module('Integration | Component | extents-map', function(hooks) {
     const elementIdRegEx = /^ember(\d+)$/; // ex: ember123
     assert.ok(elementIdRegEx.test(args[0]), 'element id was passed');
     assert.equal(args[1], config.APP.map.options, 'config options were passed');
-    assert.ok(refreshGraphics.calledTwice, 'refreshGraphics called twice');
-    assert.deepEqual(refreshGraphics.firstCall.args, [undefined], 'refreshGraphics called with no graphics initially');
-    const graphics = refreshGraphics.secondCall.args[0];
-    assert.equal(graphics.length, this.get('items').length, 'same number of graphics as items');
+    assert.ok(refreshItems.calledTwice, 'refreshItems called twice');
+    const { symbol, popupTemplate } = config.APP.map.itemExtents;
+    assert.deepEqual(refreshItems.firstCall.args, [undefined, symbol, popupTemplate], 'refreshItems called with no graphics initially');
+    assert.deepEqual(refreshItems.secondCall.args, [this.get('items'), symbol, popupTemplate], 'passed items on second call');
   });
 });

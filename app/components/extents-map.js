@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { newMap, itemToGraphicJson } from '../utils/map';
+import { newMap } from '../utils/map';
 import config from '../config/environment';
 
 export default Component.extend({
@@ -11,8 +11,7 @@ export default Component.extend({
     }
     const { symbol, popupTemplate } = config.APP.map.itemExtents;
     const items = this.get('items');
-    const jsonGraphics = items && items.map(item => itemToGraphicJson(item, symbol, popupTemplate));
-    this._map.refreshGraphics(jsonGraphics);
+    this._map.refreshItems(items, symbol, popupTemplate);
   },
 
   // wait until after the component is added to the DOM before creating the map

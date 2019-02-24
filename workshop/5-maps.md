@@ -260,16 +260,17 @@ We'll need the `Graphic` class to add graphics to the map, so we load `esri/Grap
   - add the following to the returned functions above `destroy()`:
 
 ```js
-refreshGraphics: function (jsonGraphics) {
+refreshItems: function (items, symbol, popupTemplate) {
   if (!view || !view.ready) {
     return;
   }
-  // convert JSON to graphics
-  const graphics = jsonGraphics.map(json => {
-    return new Graphic(json);
-  });
   // clear any existing graphics and add new ones (if any)
   view.graphics.removeAll();
+  // convert JSON to graphics
+  const graphics = items && items.map(item => {
+    const json = itemToGraphicJson(item, symbol, popupTemplate)
+    return new Graphic(json);
+  });
   view.graphics.addMany(graphics);
 },
 ```
@@ -289,7 +290,6 @@ Now we need to
 ```
 
 - in app/components/extents-map.js
-  - add `, itemToGraphicJson` to the map util `import` statement
   - get defaults from config by adding this `import` statement:
 
 ```js
@@ -305,8 +305,7 @@ showItemsOnMap () {
   }
   const { symbol, popupTemplate } = config.APP.map.itemExtents;
   const items = this.get('items');
-  const jsonGraphics = items && items.map(item => itemToGraphicJson(item, symbol, popupTemplate));
-  this._map.refreshGraphics(jsonGraphics);
+  this._map.refreshItems(items, symbol, popupTemplate);
 },
 ```
 
@@ -363,13 +362,13 @@ import config from 'ambitious-arcgis-app-2019/config/environment';
 
 ```js
 test('it renders', async function(assert) {
-  // spy on the refreshGraphics() function returned by newMap()
-  const refreshGraphics = this.spy();
+  // spy on the refreshItems() function returned by newMap()
+  const refreshItems = this.spy();
   // stub the newMap() function so that a map is not constructed
   const stub = this.stub(mapUtils, 'newMap').resolves({
-    refreshGraphics: refreshGraphics,
+    refreshItems,
     // NOTE: we don't spy on destroy() b/c it is called after the test completes
-    destroy: () => {},
+    destroy: () => {}
   });
   // render the component with no items
   this.set('items', undefined);
@@ -380,7 +379,9 @@ test('it renders', async function(assert) {
   const elementIdRegEx = /^ember(\d+)$/; // ex: ember123
   assert.ok(elementIdRegEx.test(args[0]), 'element id was passed');
   assert.equal(args[1], config.APP.map.options, 'config options were passed');
-  assert.ok(refreshGraphics.calledOnceWithExactly, 'refreshGraphics called once with no graphics');
+  assert.ok(refreshItems.calledOnce, 'refreshItems called only once');
+  const { symbol, popupTemplate } = config.APP.map.itemExtents;
+  assert.deepEqual(refreshItems.firstCall.args, [undefined, symbol, popupTemplate], 'refreshItems called with no graphics initially');
 });
 ```
 
@@ -426,11 +427,16 @@ function mockItems () {
 this.set('items', mockItems());
 ```
 
-- replace the last assertion with:
+- save the file; tests fail because `refreshItems()` is called twice
+- replace `assert.ok(refreshItems.calledOnce, 'refreshItems called only once');` with `assert.ok(refreshItems.calledTwice, 'refreshItems called twice');`
+
+- add this after the last assertion:
 
 ```js
-assert.ok(refreshGraphics.calledTwice, 'refreshGraphics called twice');
-assert.deepEqual(refreshGraphics.firstCall.args, [undefined], 'refreshGraphics called with no graphics initially');
-const graphics = refreshGraphics.secondCall.args[0];
-assert.equal(graphics.length, this.get('items').length, 'same number of graphics as items');
+assert.deepEqual(refreshItems.secondCall.args, [this.get('items'), symbol, popupTemplate], 'passed items on second call');
 ```
+
+- save the file
+
+Notice that:
+- all tests are now passing again

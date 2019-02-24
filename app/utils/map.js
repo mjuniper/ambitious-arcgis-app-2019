@@ -29,16 +29,17 @@ export function newMap(element, mapOptions) {
       });
       // return closure scoped functions for working with the map
       return {
-        refreshGraphics: function (jsonGraphics) {
+        refreshItems: function (items, symbol, popupTemplate) {
           if (!view || !view.ready) {
             return;
           }
-          // convert JSON to graphics
-          const graphics = jsonGraphics.map(json => {
-            return new Graphic(json);
-          });
           // clear any existing graphics and add new ones (if any)
           view.graphics.removeAll();
+          // convert JSON to graphics
+          const graphics = items && items.map(item => {
+            const json = itemToGraphicJson(item, symbol, popupTemplate)
+            return new Graphic(json);
+          });
           view.graphics.addMany(graphics);
         },
         destroy: function () {
