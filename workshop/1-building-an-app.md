@@ -20,6 +20,15 @@ cd ambitious-arcgis-app
 ```shell
 ember serve
 ```
+
+- you may see a circular dependency error in the terminal, if so:
+```shell
+ctrl-c
+npm uninstall ember-data --save-dev
+ember serve
+```
+
+
 - open a browser to http://localhost:4200/
 
 ### Add some markup and CSS
@@ -62,7 +71,7 @@ body {
 import Route from '@ember/routing/route';
 
 export default Route.extend({
-  // changes to these query parameter will cause this route to
+  // changes to these query parameters will cause this route to
   // update the model by calling the "model()" hook again
   queryParams: {
     q: { refreshModel: true }
