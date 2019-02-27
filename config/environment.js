@@ -17,6 +17,7 @@ module.exports = function(environment) {
       }
     },
     torii: {
+      // itemId: 73bd8ddb3b524494bc92ad2fb6b7cc3f
       sessionServiceName: 'session',
       providers: {
        'arcgis-oauth-bearer': {
