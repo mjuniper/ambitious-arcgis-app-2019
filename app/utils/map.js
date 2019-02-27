@@ -10,8 +10,7 @@ export function loadMap(element, mapOptions) {
     ['esri/Map', 'esri/views/MapView', 'esri/Graphic'],
     // NOTE: keep this current w/ the latest version of the JSAPI
     { css: 'https://js.arcgis.com/4.10/esri/css/main.css' }
-  )
-  .then(([Map, MapView, Graphic]) => {
+  ).then(([Map, MapView, Graphic]) => {
     if (!element) {
       // component or app was likely destroyed
       return;
@@ -29,7 +28,7 @@ export function loadMap(element, mapOptions) {
     // wait for the view to load
     return view.when(() => {
       // prevent zooming with the mouse-wheel
-      view.on("mouse-wheel", function(evt){
+      view.on('mouse-wheel', function(evt){
         evt.stopPropagation();
       });
       // return a reference to the view
@@ -40,7 +39,7 @@ export function loadMap(element, mapOptions) {
 
 export function showItemsOnMap(view, items, symbol, popupTemplate) {
   if (!_Graphic) {
-    throw new Error ('You must load a map before creating new graphics');
+    throw new Error('You must load a map before creating new graphics');
   }
   if (!view || !view.ready) {
     return;
@@ -57,13 +56,13 @@ export function showItemsOnMap(view, items, symbol, popupTemplate) {
   });
 }
 
-export function itemToGraphicJson (item, symbol, popupTemplate) {
+export function itemToGraphicJson(item, symbol, popupTemplate) {
   const geometry = coordsToExtent(item.extent);
   return { geometry, symbol, attributes: item, popupTemplate };
 }
 
 // expect [[-53.2316, -79.8433], [180, 79.8433]] or []
-function coordsToExtent (coords) {
+function coordsToExtent(coords) {
   if (coords && coords.length === 2) {
     return {
       type: 'extent',
@@ -71,8 +70,8 @@ function coordsToExtent (coords) {
       ymin: coords[0][1],
       xmax: coords[1][0],
       ymax: coords[1][1],
-      spatialReference:{
-        wkid:4326
+      spatialReference: {
+        wkid: 4326
       }
     };
   }
