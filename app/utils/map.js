@@ -1,8 +1,11 @@
 import esriLoader from 'esri-loader';
 
-// create a new map view at an element
-export function newMap(element, mapOptions) {
-  // lazy load the map modules and CSS
+// NOTE: module, not global scope
+let _Graphic;
+
+// lazy load the ArcGIS API modules and CSS
+// then create a new map view at an element
+export function loadMap(element, mapOptions) {
   return esriLoader.loadModules(
     ['esri/Map', 'esri/views/MapView', 'esri/Graphic'],
     // NOTE: keep this current w/ the latest version of the JSAPI
@@ -13,7 +16,9 @@ export function newMap(element, mapOptions) {
       // component or app was likely destroyed
       return;
     }
-    // Create the Map
+    // hold onto the graphic class for later use
+    _Graphic = Graphic;
+    // create the Map
     const map = new Map(mapOptions);
     // show the map at the element
     let view = new MapView({
@@ -27,29 +32,25 @@ export function newMap(element, mapOptions) {
       view.on("mouse-wheel", function(evt){
         evt.stopPropagation();
       });
-      // return closure scoped functions for working with the map
-      return {
-        refreshItems: function (items, symbol, popupTemplate) {
-          if (!view || !view.ready) {
-            return;
-          }
-          // clear any existing graphics and add new ones (if any)
-          view.graphics.removeAll();
-          // convert JSON to graphics
-          const graphics = items && items.map(item => {
-            const json = itemToGraphicJson(item, symbol, popupTemplate)
-            return new Graphic(json);
-          });
-          view.graphics.addMany(graphics);
-        },
-        destroy: function () {
-          if (view) {
-            view.container = null;
-            view = null;
-          }
-        }
-      };
+      // return a reference to the view
+      return view;
     });
+  });
+}
+
+export function showItemsOnMap(view, items, symbol, popupTemplate) {
+  if (!_Graphic) {
+    throw new Error ('You must load a map before creating new graphics');
+  }
+  if (!view || !view.ready) {
+    return;
+  }
+  // clear any existing graphics (if any)
+  view.graphics.removeAll();
+  // convert items to graphics and add to the view
+  items.forEach(item => {
+    const graphicJson = itemToGraphicJson(item, symbol, popupTemplate);
+    view.graphics.add(new _Graphic(graphicJson));
   });
 }
 

@@ -1,11 +1,11 @@
-import { newMap, itemToGraphicJson } from 'ambitious-arcgis-app-2019/utils/map';
+import { loadMap, itemToGraphicJson } from 'ambitious-arcgis-app-2019/utils/map';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | map', function(/* hooks */) {
 
-  test('newMap', function(assert) {
-    // TODO: write a meaningful test of newMap()
-    let result = typeof newMap === 'function';
+  test('loadMap', function(assert) {
+    // TODO: write a meaningful test of loadMap()
+    let result = typeof loadMap === 'function';
     assert.ok(result);
   });
 

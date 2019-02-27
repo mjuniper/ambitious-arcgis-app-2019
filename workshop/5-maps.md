@@ -29,9 +29,9 @@
 ```js
 import esriLoader from 'esri-loader';
 
-// create a new map view at an element
-export function newMap(element, mapOptions) {
-  // lazy load the map modules and CSS
+// lazy load the ArcGIS API modules and CSS
+// then create a new map view at an element
+export function loadMap(element, mapOptions) {
   return esriLoader.loadModules(
     ['esri/Map', 'esri/views/MapView'],
     // NOTE: keep this current w/ the latest version of the JSAPI
@@ -56,15 +56,8 @@ export function newMap(element, mapOptions) {
       view.on("mouse-wheel", function(evt){
         evt.stopPropagation();
       });
-      // return closure scoped functions for working with the map
-      return {
-        destroy: function () {
-          if (view) {
-            view.container = null;
-            view = null;
-          }
-        }
-      };
+      // return a reference to the view
+      return view;
     });
   });
 }
@@ -73,14 +66,14 @@ export function newMap(element, mapOptions) {
 - replace contents of tests/unit/utils/map-test.js
 
 ```js
-import { newMap } from 'ambitious-arcgis-app-2019/utils/map';
+import { loadMap } from 'ambitious-arcgis-app-2019/utils/map';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | map', function(/* hooks */) {
 
-  test('newMap', function(assert) {
-    // TODO: write a meaningful test of newMap()
-    let result = typeof newMap === 'function';
+  test('loadMap', function(assert) {
+    // TODO: write a meaningful test of loadMap()
+    let result = typeof loadMap === 'function';
     assert.ok(result);
   });
 });
@@ -90,7 +83,7 @@ module('Unit | Utility | map', function(/* hooks */) {
 
 ```js
 import Component from '@ember/component';
-import { newMap } from '../utils/map';
+import { loadMap } from '../utils/map';
 
 export default Component.extend({
   classNames: ['extents-map'],
@@ -99,20 +92,20 @@ export default Component.extend({
   didInsertElement () {
     this._super(...arguments);
     // create a map at this element's DOM node
-    newMap(this.elementId, { basemap: 'gray' })
-    .then(mapFunctions => {
-      // hold onto a reference to the object with the map functions
-      this._map = mapFunctions;
+    loadMap(this.elementId, { basemap: 'gray' })
+    .then(view => {
+      // hold onto a reference to the map view
+      this._view = view;
     });
   },
 
   // destroy the map before this component is removed from the DOM
   willDestroyElement () {
-    this._super(...arguments);
-    if (this._map) {
-      this._map.destroy();
-      delete this._map;
+    if (this._view) {
+      this._view.container = null;
+      delete this._view;
     }
+    this._super(...arguments);
   }
 });
 ```
@@ -252,28 +245,44 @@ function coordsToExtent (coords) {
 - all tests should pass now
 - stop tests by typing `q`
 
-### Return a function to refresh map graphics
-We'll need the `Graphic` class to add graphics to the map, so we load `esri/Graphic` in `newMap()` and return a function to refresh map graphics.
+### Add a function to show items on the map
+We'll need the `Graphic` class to add graphics to the map, so we load `esri/Graphic` in `loadMap()` and expose a function for showing items on the map as graphics.
 
 - in app/utils/map.js:
-  - add `, 'esri/Graphic'` to the end of the array of module names passed to `loadModules()`
-  - add `, Graphic` to the end of the array of classes passed to the `.then()` callback
-  - add the following to the returned functions above `destroy()`:
+  - add the following below the `import` statement and above `loadMap()`:
 
 ```js
-refreshItems: function (items, symbol, popupTemplate) {
+// NOTE: module, not global scope
+let _Graphic;
+```
+
+  - add `, 'esri/Graphic'` to the end of the array of module names passed to `loadModules()`
+  - add `, Graphic` to the end of the array of classes passed to the `.then()` callback
+  - add the following above the lines that create the map:
+
+```js
+// hold onto the graphic class for later use
+_Graphic = Graphic;
+```
+
+  - add the following below `loadMap()`:
+
+```js
+export function showItemsOnMap(view, items, symbol, popupTemplate) {
+  if (!_Graphic) {
+    throw new Error ('You must load a map before creating new graphics');
+  }
   if (!view || !view.ready) {
     return;
   }
-  // clear any existing graphics and add new ones (if any)
+  // clear any existing graphics (if any)
   view.graphics.removeAll();
-  // convert JSON to graphics
-  const graphics = items && items.map(item => {
-    const json = itemToGraphicJson(item, symbol, popupTemplate)
-    return new Graphic(json);
+  // convert items to graphics and add to the view
+  items.forEach(item => {
+    const graphicJson = itemToGraphicJson(item, symbol, popupTemplate);
+    view.graphics.add(new _Graphic(graphicJson));
   });
-  view.graphics.addMany(graphics);
-},
+}
 ```
 
 - start the app (`ember serve`)
@@ -281,8 +290,8 @@ refreshItems: function (items, symbol, popupTemplate) {
 Notice that:
 - the app still works (we didn't break anything)
 
-### Show graphics on the map
-Now we need to
+### Show items on the map
+Now we need to pass the items into the map component and have it call `showItemsOnMap()`.
 
 - in app/templates/items.hbs, pass search results to the map component:
 
@@ -291,6 +300,7 @@ Now we need to
 ```
 
 - in app/components/extents-map.js
+  - add `, showItemsOnMap` to the map utils `import` statement
   - get defaults from config by adding this `import` statement:
 
 ```js
@@ -300,21 +310,18 @@ import config from '../config/environment';
   - add the following method above `didInsertElement()`:
 
 ```js
-showItemsOnMap () {
-  if (!this._map) {
-    return;
-  }
+// show items on the map w/ the symbol and popupTemplate from the config
+showItems () {
   const { symbol, popupTemplate } = config.APP.map.itemExtents;
-  const items = this.get('items');
-  this._map.refreshItems(items, symbol, popupTemplate);
+  showItemsOnMap(this._view, this.items, symbol, popupTemplate);
 },
 ```
 
-    - in `didInsertElement()`
-      - replace `{ basemap: 'gray' }` with `config.APP.map.options`
-      - add `this.showItemsOnMap();` right after `this._map = mapFunctions;`
+  - in `didInsertElement()`
+    - replace `{ basemap: 'gray' }` with `config.APP.map.options`
+    - add `this.showItems();` right after `this._view = view;`
 
-  - visit the items route
+- visit the items route
 
 Notice that:
 - the extents appear on the map
@@ -326,7 +333,7 @@ back in app/components/extents-map.js add this method after `didInsertElement()`
 ```js
 // whenever items change, update the map
 didUpdateAttrs () {
-  this.showItemsOnMap();
+  this.showItems();
 },
 ```
 
@@ -337,7 +344,7 @@ Notice that:
 
 ## Bonus - map component test
 
-### Stub the `newMap()` function
+### Stub the `loadMap()` function
 
 We don't want to load the JSAPI or render a map when testing, so we'll use stubs and spies to test the map component.
 
@@ -363,26 +370,23 @@ import config from 'ambitious-arcgis-app-2019/config/environment';
 
 ```js
 test('it renders', async function(assert) {
-  // spy on the refreshItems() function returned by newMap()
-  const refreshItems = this.spy();
-  // stub the newMap() function so that a map is not constructed
-  const stub = this.stub(mapUtils, 'newMap').resolves({
-    refreshItems,
-    // NOTE: we don't spy on destroy() b/c it is called after the test completes
-    destroy: () => {}
-  });
+  // stub the loadMap() function and have it return a mock view
+  // to ensure the ArcGIS API is not loaded and a map is not rendered
+  const mockView = {};
+  const loadMapStub = this.stub(mapUtils, 'loadMap').resolves(mockView);
+  const showItemsStub = this.stub(mapUtils, 'showItemsOnMap');
   // render the component with no items
   this.set('items', undefined);
   await render(hbs`{{extents-map items=items}}`);
   // assertions
-  assert.ok(stub.calledOnce, 'newMap was called only once');
-  const args = stub.getCall(0).args;
+  assert.ok(loadMapStub.calledOnce, 'loadMap was called only once');
+  const args = loadMapStub.getCall(0).args;
   const elementIdRegEx = /^ember(\d+)$/; // ex: ember123
   assert.ok(elementIdRegEx.test(args[0]), 'element id was passed');
   assert.equal(args[1], config.APP.map.options, 'config options were passed');
-  assert.ok(refreshItems.calledOnce, 'refreshItems called only once');
+  assert.ok(showItemsStub.calledOnce, 'showItemsOnMap called exactly once');
   const { symbol, popupTemplate } = config.APP.map.itemExtents;
-  assert.deepEqual(refreshItems.firstCall.args, [undefined, symbol, popupTemplate], 'refreshItems called with no graphics initially');
+  assert.deepEqual(showItemsStub.firstCall.args, [mockView, undefined, symbol, popupTemplate], 'showItemsOnMap called with no items initially');
 });
 ```
 
@@ -424,17 +428,17 @@ function mockItems () {
 - add the following between `render()` and the assertions:
 
 ```js
-// update the items
+// then update the items
 this.set('items', mockItems());
 ```
 
-- save the file; tests fail because `refreshItems()` is called twice
-- replace `assert.ok(refreshItems.calledOnce, 'refreshItems called only once');` with `assert.ok(refreshItems.calledTwice, 'refreshItems called twice');`
+- save the file; tests fail because `showItemsOnMap()` is called twice
+- replace `assert.ok(showItemsStub.calledOnce, 'showItemsOnMap called exactly once');` with `assert.ok(showItemsStub.calledTwice, 'showItemsOnMap called exactly twice');`
 
 - add this after the last assertion:
 
 ```js
-assert.deepEqual(refreshItems.secondCall.args, [this.get('items'), symbol, popupTemplate], 'passed items on second call');
+assert.deepEqual(showItemsStub.secondCall.args, [mockView, this.items, symbol, popupTemplate], 'passed items on second call');
 ```
 
 - save the file

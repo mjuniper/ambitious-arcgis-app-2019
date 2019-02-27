@@ -31,28 +31,25 @@ module('Integration | Component | extents-map', function(hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function(assert) {
-    // spy on the refreshItems() function returned by newMap()
-    const refreshItems = this.spy();
-    // stub the newMap() function so that a map is not constructed
-    const stub = this.stub(mapUtils, 'newMap').resolves({
-      refreshItems,
-      // NOTE: we don't spy on destroy() b/c it is called after the test completes
-      destroy: () => {}
-    });
+    // stub the loadMap() function and have it return a mock view
+    // to ensure the ArcGIS API is not loaded and a map is not rendered
+    const mockView = {};
+    const loadMapStub = this.stub(mapUtils, 'loadMap').resolves(mockView);
+    const showItemsStub = this.stub(mapUtils, 'showItemsOnMap');
     // render the component with no items
     this.set('items', undefined);
     await render(hbs`{{extents-map items=items}}`);
-    // update the items
+    // then update the items
     this.set('items', mockItems());
     // assertions
-    assert.ok(stub.calledOnce, 'newMap was called only once');
-    const args = stub.getCall(0).args;
+    assert.ok(loadMapStub.calledOnce, 'loadMap was called only once');
+    const args = loadMapStub.getCall(0).args;
     const elementIdRegEx = /^ember(\d+)$/; // ex: ember123
     assert.ok(elementIdRegEx.test(args[0]), 'element id was passed');
     assert.equal(args[1], config.APP.map.options, 'config options were passed');
-    assert.ok(refreshItems.calledTwice, 'refreshItems called twice');
+    assert.ok(showItemsStub.calledTwice, 'showItemsOnMap called exactly twice');
     const { symbol, popupTemplate } = config.APP.map.itemExtents;
-    assert.deepEqual(refreshItems.firstCall.args, [undefined, symbol, popupTemplate], 'refreshItems called with no graphics initially');
-    assert.deepEqual(refreshItems.secondCall.args, [this.get('items'), symbol, popupTemplate], 'passed items on second call');
+    assert.deepEqual(showItemsStub.firstCall.args, [mockView, undefined, symbol, popupTemplate], 'showItemsOnMap called with no items initially');
+    assert.deepEqual(showItemsStub.secondCall.args, [mockView, this.items, symbol, popupTemplate], 'passed items on second call');
   });
 });
