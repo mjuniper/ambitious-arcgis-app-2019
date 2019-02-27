@@ -13,7 +13,9 @@ module.exports = {
         // --no-sandbox is needed when running Chrome inside a container
         process.env.CI ? '--no-sandbox' : null,
         '--headless',
-        '--disable-gpu',
+        // NOTE: becuase the smoke test actually renders a map,
+        // we have to enable WebGL otherwise the JSAPI will throw an error
+        // '--disable-gpu',
         '--disable-dev-shm-usage',
         '--disable-software-rasterizer',
         '--mute-audio',
