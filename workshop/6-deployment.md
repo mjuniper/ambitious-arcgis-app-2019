@@ -8,14 +8,19 @@ http://surge.sh/
 
 https://github.com/kiwiupover/ember-cli-surge
 
-- stop app (`ctrl+C`)
+- Stop app (`ctrl+C`)
 - `ember install ember-cli-surge`
-- come up with something-unique for your website url
+- Come up with something-unique for your website url
 - `ember g surge-domain ambitious-arcgis-app-<something-unique>.surge.sh`
-  - when asked if you would like to overwrite CNAME, respond 'y' for yes
+  - When asked if you would like to overwrite CNAME, respond 'y' for yes
 - `ember surge --environment=development`
   - create an account when prompted, if you do not already have a surge account
-- visit `ambitious-arcgis-app-<something-unique>.surge.sh`
+- Visit `ambitious-arcgis-app-<something-unique>.surge.sh`
+
+### for auth purposes
+- Return to your item from the Auth section (part 4).
+- Click on the Authentication Tab, then scroll down, and paste `http://ambitious-arcgis-app-<something-unique>.surge.sh` into the Redirect URI box and click `Add`.
+- Observe working sign-in on your deployed site
 
 ## ember-cli-deploy (demo)
 

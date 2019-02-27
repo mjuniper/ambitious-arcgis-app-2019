@@ -10,7 +10,7 @@ Give your app a name, tags and a description and click the "Register" button.
 
 The app item will be created in your ArcGIS Org, and the browser will now show information - including the `Client Id`. Copy that, but leave the browser tab open.
 
-We also need to add a "Redirect URI". Click on the Authentication Tab, then scroll down, and paste `http://localhost:4200` into the Redirect URI box and click `Add`.
+We also need to add a "Redirect URI". Click on the Authentication Tab, then scroll down, and paste `http://localhost:4200` into the Redirect URI box and click `Add`. (Keep this window open, or take note of the itemId for future reference in the Deployment section).
 
 In your editor, open `/config/environment.js` and go into the `torii` section and add your client id.
 
