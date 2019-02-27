@@ -277,6 +277,9 @@ export function showItemsOnMap(view, items, symbol, popupTemplate) {
   }
   // clear any existing graphics (if any)
   view.graphics.removeAll();
+  if (!items) {
+    return;
+  }
   // convert items to graphics and add to the view
   items.forEach(item => {
     const graphicJson = itemToGraphicJson(item, symbol, popupTemplate);
