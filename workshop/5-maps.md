@@ -128,21 +128,18 @@ Notice that:
 
 ## Showing item extents on the map
 
-### Logic
+### Concepts
 Once the map has loaded, and whenever the search results are updated:
 - clear map graphics
 - loop through items, and for each
- - create a `new Graphic()` from the item
+ - create a [Graphic](https://developers.arcgis.com/javascript/latest/sample-code/intro-graphics/index.html) from the item
  - add the graphic to the map
 
-2 sets of async state: Application (Ember) and map:
-- each has own lifecyle (event)
+There are two sets of async state: application (Ember) and map:
+- component and map each have their own lifecyles (loading, updated, etc)
 - up to developer to keep 2 sets of state in sync.
 
-Converting item to a [Graphic](https://developers.arcgis.com/javascript/latest/sample-code/intro-graphics/index.html):
-- get `geometry` by converting item `extent` from coordinate array to extent JSON
-- get `attributes` from item `title` and `snippet`
-- get `infoTemplate` and `symbol` from config
+For the graphics, we want to do as much work as we can in JSON and avoid creating `new` instances of classes like `Symbol`, etc.
 
 ### Add configuration parameters
 Before we add the code to show graphics, let's put default parameters into the application config.
@@ -175,6 +172,11 @@ map: {
 ```
 
 ### Add a utility function to convert an item to graphic JSON
+Logic:
+- get `geometry` by converting item `extent` from coordinate array to extent JSON
+- get `attributes` from item `title` and `snippet`
+- get `infoTemplate` and `symbol` from config
+
 We'll use test driven development for this function:
 
 - run tests w/ `ember test -s`
@@ -335,7 +337,9 @@ back in app/components/extents-map.js add this method after `didInsertElement()`
 ```js
 // whenever items change, update the map
 didUpdateAttrs () {
-  this.showItems();
+  if (this._view) {
+    this.showItems();
+  }
 },
 ```
 

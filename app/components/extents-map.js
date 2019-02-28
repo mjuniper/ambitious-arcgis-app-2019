@@ -25,7 +25,9 @@ export default Component.extend({
 
   // whenever items change, update the map
   didUpdateAttrs () {
-    this.showItems();
+    if (this._view) {
+      this.showItems();
+    }
   },
 
   // destroy the map before this component is removed from the DOM
