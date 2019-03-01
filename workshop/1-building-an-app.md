@@ -152,8 +152,9 @@ export default Route.extend({
 ```js
 actions: {
   doSearch () {
+    const q = this.get('q');
     this.transitionToRoute('items', {
-      queryParams: { this.q }
+      queryParams: { q }
     });
   }
 }

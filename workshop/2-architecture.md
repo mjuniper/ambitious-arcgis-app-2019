@@ -33,7 +33,7 @@ export default Component.extend({
 
   // allow the consuming template to set the input size ('lg' or 'sm')
   sizeClass: computed('size', function () {
-    const size = this.size;
+    const size = this.get('size');
     if (size) {
       return `input-group-${size}`;
     } else {
@@ -211,7 +211,7 @@ export default Route.extend({
 
   // the model hook is used to fetch any data based on route parameters
   model (params) {
-    const itemsService = this.itemsService;
+    const itemsService = this.get('itemsService');
     const q = params.q || '*';
     return itemsService.search({ q });
   }
