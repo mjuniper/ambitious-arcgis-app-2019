@@ -33,7 +33,7 @@ export default Component.extend({
 
   // allow the consuming template to set the input size ('lg' or 'sm')
   sizeClass: computed('size', function () {
-    const size = this.get('size');
+    const size = this.size;
     if (size) {
       return `input-group-${size}`;
     } else {
@@ -211,7 +211,7 @@ export default Route.extend({
 
   // the model hook is used to fetch any data based on route parameters
   model (params) {
-    const itemsService = this.get('itemsService');
+    const itemsService = this.itemsService;
     const q = params.q || '*';
     return itemsService.search({ q });
   }
@@ -383,6 +383,3 @@ assert.equal(findAll('table tbody tr').length, 10);
 ### Notes:
 - component integration tests
 - more acceptance tests
-
-
-`git remote add origin https://github.com/mjuniper/ambitious-arcgis-app-2018-live.git`
