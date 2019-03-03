@@ -107,7 +107,6 @@ actions: {
 ## Add an items service
 
 - `ember g service items-service`
-- restart the ember server (`ctrl-c / ember s`)
 - add the fake `search` method to the service:
 
 ```js
