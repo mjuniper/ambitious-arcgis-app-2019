@@ -1,6 +1,6 @@
 # Building Ambitious Applications Integrated with ArcGIS Online/Portal
 
-This repository contains the source code and resources from the DevSummit 2017 Building Ambitious Applications Integrated with ArcGIS Online/Portal pre-conference workshop.
+This repository contains the source code and resources from the DevSummit 2019 Building Ambitious Applications Integrated with ArcGIS Online/Portal pre-conference workshop.
 
 ## Presenters
 
