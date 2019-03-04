@@ -11,8 +11,6 @@ This repository contains the source code and resources from the DevSummit 2019 B
 
 ## Outline
 
-### TODO: update the links below!!!
-
 - Building an App
   - [slides](http://mjuniper.github.io/presentations/ds2019/ambitious-apps-building.html)
   - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2019/blob/master/workshop/1-building-an-app.md)
