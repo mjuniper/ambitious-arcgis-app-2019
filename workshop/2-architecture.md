@@ -253,8 +253,7 @@ export default Route.extend({
 - observe that we now see search results (that are always the same regardless of what you search for)
 
 ### Notes:
-- Data binding to a collection
-- `each` helper
+- Data binding to a collection: `each` helper
 
 ## Refactor to use a results-item component
 

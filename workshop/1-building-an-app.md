@@ -100,7 +100,6 @@ export default Route.extend({
 - generators
 - route lifecycle hooks: model
 - data binding
-- ember object, get, set, extend, CPs - [ember twiddle](https://ember-twiddle.com/38e642b4a4f9b5ea748965f0bd9152ab?numColumns=2&openFiles=routes.application.js%2Ccontrollers.application.js)
 
 ### Add index route
 - `ember generate route index`
