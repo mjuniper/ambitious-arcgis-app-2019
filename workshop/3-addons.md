@@ -92,7 +92,7 @@ num: { refreshModel: true },
 - then update the `model()` hook as follows:
 
 ```js
-return itemsService.search({ q, num: params.num, start: params.start });
+return this.itemsService.search({ q, num: params.num, start: params.start });
 ```
 
 in app/controllers/items.js:
