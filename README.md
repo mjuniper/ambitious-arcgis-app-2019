@@ -27,7 +27,7 @@ This repository contains the source code and resources from the DevSummit 2019 B
   - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2019/blob/master/workshop/5-maps.md)
 - Deployment
   - [slides](https://www.slideshare.net/MarkhamShofner/building-ambitious-apps-deployment-2018-89594832)
-  - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2018/blob/master/workshop/6-deployment.md)
+  - [workshop](https://github.com/mjuniper/ambitious-arcgis-app-2019/blob/master/workshop/6-deployment.md)
 
 ## Source Code
 
